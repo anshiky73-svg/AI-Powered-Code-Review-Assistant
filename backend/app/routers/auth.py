@@ -1,0 +1,47 @@
+from fastapi import APIRouter, Depends, HTTPException
+from sqlalchemy.orm import Session
+
+from app.core.database import get_db
+from app.core.security import hash_password
+
+from app.models.user import User
+from app.schemas.auth import UserRegister, UserOut
+
+router = APIRouter(
+    prefix="/api/auth",
+    tags=["Authentication"]
+)
+
+
+@router.post(
+    "/register",
+    response_model=UserOut,
+    status_code=201
+)
+def register(
+    user: UserRegister,
+    db: Session = Depends(get_db)
+):
+    existing_user = (
+        db.query(User)
+        .filter(User.email == user.email)
+        .first()
+    )
+
+    if existing_user:
+        raise HTTPException(
+            status_code=409,
+            detail="Email already registered"
+        )
+
+    new_user = User(
+        email=user.email,
+        password_hash=hash_password(user.password),
+        name=user.name
+    )
+
+    db.add(new_user)
+    db.commit()
+    db.refresh(new_user)
+
+    return new_user

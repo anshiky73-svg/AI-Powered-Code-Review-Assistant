@@ -2,15 +2,17 @@ from sqlalchemy import String, DateTime
 from sqlalchemy.orm import Mapped, mapped_column
 from sqlalchemy import Uuid
 from uuid import uuid4
+from sqlalchemy.sql import func
 from datetime import datetime
 
 from app.core.database import Base
+from uuid import UUID
 
 
 class User(Base):
     __tablename__ = "users"
 
-    id: Mapped[str] = mapped_column(
+    id: Mapped[UUID] = mapped_column(
         Uuid,
         primary_key=True,
         default=uuid4
@@ -34,6 +36,6 @@ class User(Base):
     )
 
     created_at: Mapped[datetime] = mapped_column(
-        DateTime,
-        default=datetime.utcnow
+    DateTime(timezone=True),
+    server_default=func.now()
     )
