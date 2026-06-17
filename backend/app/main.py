@@ -4,6 +4,7 @@ from app.core.database import Base, engine
 from app.routers.auth import router as auth_router
 
 import app.models
+from app.routers.projects import router as projects_router
 
 app = FastAPI()
 
@@ -14,7 +15,7 @@ def startup():
 
 
 app.include_router(auth_router)
-
+app.include_router(projects_router)
 
 @app.get("/api/health")
 def health():
