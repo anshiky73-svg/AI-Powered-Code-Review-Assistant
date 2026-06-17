@@ -13,6 +13,8 @@ from app.schemas.auth import (
 from app.models.user import User
 from app.schemas.auth import UserRegister, UserOut
 
+from app.core.dependencies import get_current_user
+
 router = APIRouter(
     prefix="/api/auth",
     tags=["Authentication"]
@@ -91,3 +93,9 @@ def login(
     return TokenResponse(
         access_token=token
     )
+    
+@router.get("/me")
+def me(
+    current_user=Depends(get_current_user)
+):
+    return current_user   
