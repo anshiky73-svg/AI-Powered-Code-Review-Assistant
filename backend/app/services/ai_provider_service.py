@@ -1,6 +1,4 @@
 import httpx
-
-
 def generate_completion(
     base_url: str,
     model_name: str,

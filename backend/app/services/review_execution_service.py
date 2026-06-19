@@ -6,6 +6,10 @@ from app.services.ai_provider_service import (
     generate_completion
 )
 
+from app.core.encryption import (
+    decrypt_value
+)
+
 
 def run_review(
     provider,
@@ -25,10 +29,17 @@ def run_review(
         }
     ]
 
+    api_key = None
+
+    if provider.api_key_encrypted:
+        api_key = decrypt_value(
+            provider.api_key_encrypted
+        )
+
     response = generate_completion(
         base_url=provider.base_url,
         model_name=provider.model_name,
-        api_key=None,
+        api_key=api_key,
         messages=messages
     )
 

@@ -20,6 +20,11 @@ from app.schemas.review import (
 )
 
 from app.routers.auth import get_current_user
+from app.models.review_finding import ReviewFinding
+
+from app.services.review_parser_service import (
+    parse_review_response
+)
 
 from app.services.review_execution_service import (
     run_review
@@ -90,24 +95,59 @@ def create_review(
         for file in files
     )
 
-    review_output = execute_review(
+    review_output = run_review(
         provider=provider,
         code_content=code_content,
         review_type=payload.review_type
     )
+    
+    parsed = parse_review_response(
+    review_output
+    )
 
     review = Review(
-        project_id=project.id,
-        provider_id=provider.id,
-        review_type=payload.review_type,
-        status="completed",
-        summary=review_output[:500],
-        raw_output=review_output
+    project_id=project.id,
+    provider_id=provider.id,
+    review_type=payload.review_type,
+    status="completed",
+    summary=parsed["summary"],
+    raw_output=review_output
     )
 
     db.add(review)
     db.commit()
     db.refresh(review)
+    
+    for finding_data in parsed["findings"]:
+
+        finding = ReviewFinding(
+            review_id=review.id,
+            severity=finding_data.get(
+                "severity",
+                "info"
+            ),
+            title=finding_data.get(
+                "title",
+                "Unknown"
+            ),
+            description=finding_data.get(
+                "description",
+                ""
+            ),
+            recommendation=finding_data.get(
+                "recommendation"
+            ),
+            file_path=finding_data.get(
+                "file_path"
+            ),
+            line_number=finding_data.get(
+                "line_number"
+            )
+        )
+
+        db.add(finding)
+
+    db.commit()
 
     return review
 
@@ -117,6 +157,7 @@ def create_review(
 )
 def get_reviews(
     project_id: str,
+    query: str | None = None,
     db: Session = Depends(get_db),
     current_user = Depends(get_current_user)
 ):
@@ -136,11 +177,22 @@ def get_reviews(
             detail="Project not found"
         )
 
-    return (
+    reviews_query = (
         db.query(Review)
         .filter(
             Review.project_id == project.id
         )
+    )
+
+    if query:
+        reviews_query = reviews_query.filter(
+            Review.summary.ilike(
+                f"%{query}%"
+            )
+        )
+
+    return (
+        reviews_query
         .order_by(
             Review.created_at.desc()
         )
@@ -189,3 +241,56 @@ def get_review(
         )
 
     return review    
+
+from app.schemas.review import (
+    ReviewFindingResponse
+)
+
+@router.get(
+    "/{project_id}/reviews/{review_id}/findings",
+    response_model=list[ReviewFindingResponse]
+)
+def get_review_findings(
+    project_id: str,
+    review_id: str,
+    db: Session = Depends(get_db),
+    current_user=Depends(get_current_user)
+):
+
+    project = (
+        db.query(Project)
+        .filter(
+            Project.id == project_id,
+            Project.owner_id == current_user["sub"]
+        )
+        .first()
+    )
+
+    if not project:
+        raise HTTPException(
+            status_code=404,
+            detail="Project not found"
+        )
+
+    review = (
+        db.query(Review)
+        .filter(
+            Review.id == review_id,
+            Review.project_id == project.id
+        )
+        .first()
+    )
+
+    if not review:
+        raise HTTPException(
+            status_code=404,
+            detail="Review not found"
+        )
+
+    return (
+        db.query(ReviewFinding)
+        .filter(
+            ReviewFinding.review_id == review.id
+        )
+        .all()
+    )
