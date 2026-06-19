@@ -8,11 +8,19 @@ class CodeFileCreate(BaseModel):
     content: str
 
 
-class CodeFileResponse(BaseModel):
-    id: UUID
+class CodeFileUpdate(BaseModel):
     filename: str
     language: str
     content: str
+
+
+class CodeFileResponse(BaseModel):
+    id: UUID
+    filename: str
+    path: str | None = None
+    language: str
+    content: str
+    size_bytes: int | None = None
     project_id: UUID
 
     model_config = {

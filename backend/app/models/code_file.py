@@ -5,6 +5,7 @@ from uuid import uuid4
 from datetime import datetime, UTC
 
 from app.core.database import Base
+from sqlalchemy import Integer
 
 
 class CodeFile(Base):
@@ -21,6 +22,11 @@ class CodeFile(Base):
         nullable=False
     )
 
+    path: Mapped[str] = mapped_column(
+        String(1000),
+        nullable=True
+    )
+
     language: Mapped[str] = mapped_column(
         String(50),
         nullable=False
@@ -29,6 +35,11 @@ class CodeFile(Base):
     content: Mapped[str] = mapped_column(
         Text,
         nullable=False
+    )
+
+    size_bytes: Mapped[int] = mapped_column(
+        Integer,
+        default=0
     )
 
     project_id: Mapped[str] = mapped_column(
