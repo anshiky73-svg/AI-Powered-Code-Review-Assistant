@@ -14,7 +14,7 @@ const geistMono = Geist_Mono({
 
 export const metadata: Metadata = {
   title: "AI Powered Code Review Assistant",
-  description: "A developer-focused dashboard for AI-assisted code review.",
+  description: "AI-powered code review platform for developers.",
 };
 
 export default function RootLayout({
@@ -25,9 +25,9 @@ export default function RootLayout({
   return (
     <html
       lang="en"
-      className={`${geistSans.variable} ${geistMono.variable} h-full antialiased`}
+      className={`${geistSans.variable} ${geistMono.variable}`}
     >
-      <body className="min-h-full bg-[#0a0a0a] font-sans text-white">
+      <body>
         {children}
       </body>
     </html>

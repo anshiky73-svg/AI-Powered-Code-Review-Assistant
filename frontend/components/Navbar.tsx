@@ -1,62 +1,82 @@
 "use client";
 
-import { useState } from "react";
 import { useRouter } from "next/navigation";
 
 export function Navbar() {
-  const [open, setOpen] = useState(false);
   const router = useRouter();
 
   const handleLogout = () => {
-    if (typeof window !== "undefined") {
-      localStorage.removeItem("token");
-    }
+    localStorage.removeItem("token");
     router.push("/login");
   };
 
   return (
-    <header className="sticky top-0 z-20 border-b border-slate-800 bg-[#090909]/95 backdrop-blur-md shadow-sm">
-      <div className="mx-auto flex h-16 max-w-7xl items-center justify-between px-4 sm:px-6">
-        <div className="flex items-center gap-3">
-          <div className="flex h-11 w-11 items-center justify-center rounded-2xl border border-slate-700 bg-slate-900 text-sm font-semibold text-blue-400">
+    <header className="sticky top-0 z-50 bg-white/90 backdrop-blur border-b border-gray-200">
+      <div className="max-w-7xl mx-auto h-20 px-6 flex items-center justify-between">
+        
+        {/* Logo */}
+        <div
+          className="flex items-center gap-3 cursor-pointer"
+          onClick={() => router.push("/dashboard")}
+        >
+          <div className="h-11 w-11 rounded-xl bg-[#FF6B35] flex items-center justify-center text-white font-bold">
             AI
           </div>
+
           <div>
-            <p className="text-sm font-semibold text-white">
-              AI Powered Code Review
-            </p>
-            <p className="text-xs text-slate-400">
-              Developer-focused workflow
+            <h1 className="font-bold text-lg text-gray-900">
+              CodeReview AI
+            </h1>
+
+            <p className="text-sm text-gray-500">
+              AI Powered Reviews
             </p>
           </div>
         </div>
 
+        {/* Navigation */}
+        <nav className="hidden md:flex items-center gap-8 text-sm font-medium">
+          <button
+            onClick={() => router.push("/dashboard")}
+            className="text-gray-700 hover:text-[#FF6B35]"
+          >
+            Dashboard
+          </button>
+
+          <button
+            onClick={() => router.push("/providers")}
+            className="text-gray-700 hover:text-[#FF6B35]"
+          >
+            Providers
+          </button>
+
+          <button
+            onClick={() => router.push("/dashboard")}
+            className="text-gray-700 hover:text-[#FF6B35]"
+          >
+            Projects
+          </button>
+        </nav>
+
+        {/* Actions */}
         <div className="flex items-center gap-3">
           <button
-            type="button"
-            onClick={() => setOpen((value) => !value)}
-            className="rounded-full border border-slate-800 bg-slate-950 px-4 py-2 text-sm text-slate-200 transition hover:border-blue-500 hover:text-white"
-          >
-            User Menu
-          </button>
-          <button
-            type="button"
             onClick={handleLogout}
-            className="rounded-full bg-blue-600 px-4 py-2 text-sm font-medium text-white transition hover:bg-blue-500"
+            className="
+              bg-[#FF6B35]
+              hover:bg-[#E85A29]
+              text-white
+              px-5
+              py-2.5
+              rounded-full
+              font-medium
+              transition
+            "
           >
             Logout
           </button>
         </div>
       </div>
-
-      {open ? (
-        <div className="border-t border-slate-800 bg-slate-950 px-4 py-3 text-sm text-slate-300 sm:px-6">
-          <div className="flex flex-col gap-2">
-            <p className="text-white">Signed in as developer@example.com</p>
-            <p className="text-slate-500">Role: Admin</p>
-          </div>
-        </div>
-      ) : null}
     </header>
   );
 }
